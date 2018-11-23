@@ -6,15 +6,15 @@ DIRS=$(SRCDIR)
 SOURCES=$(foreach d,$(DIRS),$(wildcard $(d)/*.c))
 STRIPPED_SOURCES=$(patsubst $(SRCDIR)/%,%,$(SOURCES))
 
-VPR_DIR?=$(PWD)/lib/vcblockchain/lib/vpr/
+VPR_DIR?=$(PWD)/lib/vcblockchain/lib/vpr
 VPR_INCLUDE_PATH?=$(VPR_DIR)/include
 VPR_CFLAGS=-I $(VPR_INCLUDE_PATH)
 
-VCCRYPT_DIR?=$(PWD)/lib/vcblockchain/lib/vccrypt/
+VCCRYPT_DIR?=$(PWD)/lib/vcblockchain/lib/vccrypt
 VCCRYPT_INCLUDE_PATH?=$(VCCRYPT_DIR)/include
 VCCRYPT_CFLAGS=-I $(VCCRYPT_INCLUDE_PATH)
 
-VCCERT_DIR?=$(PWD)/lib/vctoolchain/lib/vccert/
+VCCERT_DIR?=$(PWD)/lib/vcblockchain/lib/vccert
 VCCERT_INCLUDE_PATH?=$(VCCERT_DIR)/include
 VCCERT_CFLAGS=-I $(VCCERT_INCLUDE_PATH)
 
