@@ -11,11 +11,35 @@
 volatile bool vjblockchain_initialized = false;
 allocator_options_t alloc_opts;
 vccrypt_suite_options_t crypto_suite;
-vccert_builder_options_t builder_opts;
+vccert_parser_options_t parser_opts;
+
+static bool dummy_txn_resolver(void *a, void *b, const uint8_t *c, const uint8_t *d, vccrypt_buffer_t *e, bool *f)
+{
+    return false;
+};
+
+static int32_t dummy_artifact_state_resolver(void *a, void *b, const uint8_t *c, vccrypt_buffer_t *d)
+{
+    return -1;
+}
+
+static bool dummy_entity_key_resolver(void *a, void *b, uint64_t c, const uint8_t *d, vccrypt_buffer_t *e,
+                                      vccrypt_buffer_t *f)
+{
+    return false;
+}
+
+static vccert_contract_fn_t dummy_contract_resolver(void *a, void *b, const uint8_t *c, const uint8_t *d)
+{
+    return NULL;
+}
+
 
 EMSCRIPTEN_KEEPALIVE
-int vwblockchain_init() {
-    if (vjblockchain_initialized) {
+int vwblockchain_init()
+{
+    if (vjblockchain_initialized)
+    {
         JS_THROW("vwblockchain already initialized.")
         return -1;
     }
@@ -26,16 +50,21 @@ int vwblockchain_init() {
 
     malloc_allocator_options_init(&alloc_opts);
 
+    int dummy_context;
+
     INIT_OR_FAIL(
         "vccrypt suite options",
         (vccrypt_suite_options_init(&crypto_suite, &alloc_opts, VCCRYPT_SUITE_VELO_V1))
     )
 
     INIT_OR_FAIL(
-        "vccert builder options",
-        (vccert_builder_options_init(&builder_opts, &alloc_opts, &crypto_suite))
+        "vccert options",
+        (vccert_parser_options_init(&parser_opts, &alloc_opts, &crypto_suite, &dummy_txn_resolver,
+                                    &dummy_artifact_state_resolver, &dummy_contract_resolver,
+                                    &dummy_entity_key_resolver, &dummy_context))
     )
 
     vjblockchain_initialized = true;
     return 0;
 }
+
