@@ -40,7 +40,7 @@ int vwblockchain_init()
 {
     if (vjblockchain_initialized)
     {
-        JS_THROW("vwblockchain already initialized.")
+        JS_THROW("vwblockchain already initialized.", -1)
         return -1;
     }
 

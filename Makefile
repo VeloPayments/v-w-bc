@@ -28,7 +28,7 @@ WASM_RELEASE_CFLAGS=\
 
 WASM_RELEASE_LINK_FLAGS=-lvcblockchain -L$(VCBLOCKCHAIN_LIBRARY_PATH)\
 						-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'\
-						--emrun
+						-s MODULARIZE=1 -s 'EXPORT_NAME="libvwblockchain"'\
 
 LIB_NAME=libvwblockchain.html
 WASM_RELEASE_LIB=$(WASM_RELEASE_BUILD_DIR)/$(LIB_NAME)

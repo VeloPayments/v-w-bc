@@ -2,21 +2,25 @@
 #define VWBLOCKCHAIN_ERROR_H
 
 #include <emscripten/emscripten.h>
+#include <string.h>
 
-#define JS_THROW(x) {\
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#define JS_THROW(x, y) {\
     EM_ASM_({\
         var msg = Pointer_stringify($0);\
-        var file = Pointer_stringify($1);\
+        var file = Pointer_stringify($2);\
         var err = new Error(msg);\
-        err.stack = 'Error: ' + msg + '\n\tat ' + file + ':' + $2;\
+        var num = $1;\
+        err.stack = 'Error' + ' (' + num + '): ' + msg + '\n\tat ' + file + ':' + $3;\
         throw err;\
-    }, x, __FILE__, __LINE__);\
+    }, x, y, __FILENAME__, __LINE__);\
 }\
 
 #define INIT_OR_FAIL(text, invocation) {\
     if (0 != (invocation))\
     {\
-        JS_THROW(text " not initialized");\
+        JS_THROW(text " not initialized", invocation);\
         return -1;\
     }\
 }\
