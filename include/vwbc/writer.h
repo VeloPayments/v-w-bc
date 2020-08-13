@@ -9,11 +9,17 @@
 
 enum FieldType
 {
-    INT8, INT16, INT32, INT64, STRING, BUFFER, UINT64,
+    INT8, INT16, INT32, INT64, STRING, BUFFER, UINT64
 };
 
 typedef std::variant<
-        int8_t, int16_t, int32_t, int64_t, uint64_t, std::string
+        int8_t,
+        int16_t,
+        int32_t,
+        int64_t,
+        uint64_t,
+        std::string,
+        std::vector<uint8_t>
 > FieldValue;
 
 typedef std::tuple<uint16_t, FieldType, FieldValue> Field;
@@ -23,7 +29,7 @@ class CertificateBuilder
 public:
     CertificateBuilder() = default;
 
-    ~CertificateBuilder() = default;
+    ~CertificateBuilder();
 
     void add_string(uint16_t field, const std::string &value);
 
@@ -35,7 +41,7 @@ public:
 
     void add_long(uint16_t field, int64_t value);
 
-    void add_bytes(uint16_t field, emscripten::val value);
+    void add_bytes(uint16_t field, const std::string &value);
 
     void add_uuid(uint16_t field, const std::string &value);
 
@@ -56,9 +62,12 @@ private:
 
     void write_string_field(uint16_t field, const std::string &value);
 
-    std::vector<Field> fields;
+    void write_bytes_field(uint16_t field, std::vector<uint8_t> value);
+
     size_t size;
+    std::vector<Field> fields;
     vccert_builder_context_t context;
+    bool context_is_valid = false;
 };
 
 void certificate_builder(const emscripten::val &callback);

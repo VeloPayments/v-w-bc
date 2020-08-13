@@ -4,6 +4,16 @@
 #include <vwbc/error.h>
 #include <vpr/parameters.h>
 
+
+CertificateBuilder::~CertificateBuilder()
+{
+    if (context_is_valid)
+    {
+        dispose((disposable_t *) &context);
+    }
+}
+
+
 void CertificateBuilder::add_string(uint16_t field, const std::string &value)
 {
     size += 2 + 2 + value.length();
@@ -18,7 +28,12 @@ void CertificateBuilder::add_int(uint16_t field, int32_t value)
 
 emscripten::val CertificateBuilder::emit()
 {
-    vccert_builder_init(&cert_builder_options, &context, size);
+    int result = vccert_builder_init(&cert_builder_options, &context, size);
+    if (result != VCCERT_STATUS_SUCCESS)
+    {
+        JS_THROW("Failed to setup certificate builder context.");
+    }
+    context_is_valid = true;
 
     for (auto[field, type, value] : fields)
     {
@@ -43,7 +58,7 @@ emscripten::val CertificateBuilder::emit()
                 write_uint64_field(field, std::get<uint64_t>(value));
                 break;
             case BUFFER:
-                // TODO: handle buffers in what type(?)
+                write_bytes_field(field, std::get<std::vector<uint8_t>>(value));
                 break;
         }
     }
@@ -70,18 +85,28 @@ void CertificateBuilder::add_long(uint16_t UNUSED(field), int64_t UNUSED(value))
     JS_THROW("todo")
 }
 
-void CertificateBuilder::add_bytes(uint16_t UNUSED(field),
-                                   emscripten::val value)
-{
-    size_t bytes_size = value["byteLength"].as<int32_t>();
-    size += 2 + 2 + bytes_size;
 
+void CertificateBuilder::add_bytes(uint16_t field,
+                                   const std::string &value)
+{
+    // Its not actually a string. its just how embind matches types JS<->C++
+    std::vector<uint8_t> bytes(std::begin(value), std::end(value));
+    size += 2 + 2 + bytes.size();
+    fields.emplace_back(std::make_tuple(field, BUFFER, bytes));
 }
 
-void CertificateBuilder::add_uuid(uint16_t UNUSED(field),
-                                  const std::string &UNUSED(value))
+void CertificateBuilder::add_uuid(uint16_t field,
+                                  const std::string &value)
 {
-    JS_THROW("todo")
+    size += 2 + 2 + 16;
+    vpr_uuid id;
+    int result = vpr_uuid_from_string(&id, value.c_str());
+    if (result != VPR_STATUS_SUCCESS)
+    {
+        JS_THROW("Failed to parse UUID.");
+    }
+    std::vector<uint8_t> bytes(id.data, std::end(id.data));
+    fields.emplace_back(std::make_tuple(field, BUFFER, bytes));
 }
 
 void CertificateBuilder::add_date(uint16_t field,
@@ -127,6 +152,13 @@ void CertificateBuilder::write_uint64_field(uint16_t field, uint64_t value)
     vccert_builder_add_short_uint64(&context, field, value);
 }
 
+void
+CertificateBuilder::write_bytes_field(uint16_t field,
+                                      std::vector<uint8_t> value)
+{
+    vccert_builder_add_short_buffer(&context, field, value.data(),
+                                    value.size());
+}
 
 void certificate_builder(const emscripten::val &callback)
 {
