@@ -1,8 +1,11 @@
 #include <emscripten/bind.h>
-#include <vwbc/writer.h>
-#include <vwbc/init.h>
 #include <emscripten/em_asm.h>
 #include <iostream>
+#include <vwbc/init.h>
+#include <vwbc/builder.h>
+#include <vwbc/parser.h>
+#include <vwbc/fields.h>
+#include <vwbc/reader.h>
 
 using namespace emscripten;
 
@@ -40,7 +43,9 @@ void init()
 EMSCRIPTEN_BINDINGS(vwbc)
 {
     function("init", &init);
+
     class_<CertificateBuilder>("CertificateBuilder")
+            .class_function("use", &CertificateBuilder::use)
             .function("emit", &CertificateBuilder::emit)
             .function("add_byte", &CertificateBuilder::add_byte)
             .function("add_short", &CertificateBuilder::add_short)
@@ -49,5 +54,13 @@ EMSCRIPTEN_BINDINGS(vwbc)
             .function("add_date", &CertificateBuilder::add_date)
             .function("add_uuid", &CertificateBuilder::add_uuid)
             .function("add_string", &CertificateBuilder::add_string);
-    function("certificate_builder", &certificate_builder);
+
+    // todo, more values.
+    enum_<vccert_field_type_t>("FieldTuple")
+            .value("INVALID", VCCERT_FIELD_TYPE_INVALID)
+            .value("CERTIFICATE_VERSION", VCCERT_FIELD_TYPE_CERTIFICATE_VERSION)
+            .value("CERTIFICATE_VALID_FROM",
+                   VCCERT_FIELD_TYPE_CERTIFICATE_VALID_FROM)
+            .value("CERTIFICATE_VALID_TO",
+                   VCCERT_FIELD_TYPE_CERTIFICATE_VALID_TO);
 }

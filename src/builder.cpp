@@ -1,9 +1,8 @@
-#include <vwbc/writer.h>
+#include <vwbc/builder.h>
 #include <vccert/builder.h>
 #include <vwbc/init.h>
 #include <vwbc/error.h>
 #include <vpr/parameters.h>
-
 
 CertificateBuilder::~CertificateBuilder()
 {
@@ -82,7 +81,8 @@ void CertificateBuilder::add_short(uint16_t field, int16_t value)
 
 void CertificateBuilder::add_long(uint16_t UNUSED(field), int64_t UNUSED(value))
 {
-    JS_THROW("todo")
+    JS_THROW("int64_t is unsupported until we can figure out "
+             + "how to do it with JS lack of int64 support. (2^53-1) :(")
 }
 
 
@@ -160,7 +160,7 @@ CertificateBuilder::write_bytes_field(uint16_t field,
                                     value.size());
 }
 
-void certificate_builder(const emscripten::val &callback)
+void CertificateBuilder::use(const emscripten::val &callback)
 {
     CertificateBuilder builder;
     callback(builder);

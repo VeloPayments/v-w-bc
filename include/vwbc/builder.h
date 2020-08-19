@@ -5,7 +5,7 @@
 #include <tuple>
 #include <variant>
 #include <vector>
-#include <subprojects/vccert/include/vccert/builder.h>
+#include <vccert/builder.h>
 
 enum FieldType
 {
@@ -22,13 +22,12 @@ typedef std::variant<
         std::vector<uint8_t>
 > FieldValue;
 
-typedef std::tuple<uint16_t, FieldType, FieldValue> Field;
+typedef std::tuple<uint16_t, FieldType, FieldValue> FieldTuple;
 
 class CertificateBuilder
 {
 public:
-    CertificateBuilder() = default;
-
+    static void use(const emscripten::val &callback);
     ~CertificateBuilder();
 
     void add_string(uint16_t field, const std::string &value);
@@ -50,6 +49,8 @@ public:
     emscripten::val emit();
 
 private:
+    CertificateBuilder() = default;
+
     void write_int8_field(uint16_t field, int8_t value);
 
     void write_int16_field(uint16_t field, int16_t value);
@@ -65,7 +66,7 @@ private:
     void write_bytes_field(uint16_t field, std::vector<uint8_t> value);
 
     size_t size;
-    std::vector<Field> fields;
+    std::vector<FieldTuple> fields;
     vccert_builder_context_t context;
     bool context_is_valid = false;
 };
