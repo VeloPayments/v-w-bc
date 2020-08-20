@@ -5,10 +5,10 @@ ar = 'emar'
 
 [properties]
 exe_suffix = 'js'
-c_args = ['--bind', '-s', 'MODULARIZE=1']
-c_link_args = ['--bind', '-s', 'MODULARIZE=1']
-cpp_args = ['--bind', '-s', 'MODULARIZE=1']
-cpp_link_args = ['--bind', '-s', 'MODULARIZE=1']
+c_args = ['-g', '--bind', '-s', 'MODULARIZE=1']
+c_link_args = ['-g', '--bind', '-s', 'MODULARIZE=1']
+cpp_args = ['-g', '--bind', '-s', 'MODULARIZE=1']
+cpp_link_args = ['-g', '--bind', '-s', 'MODULARIZE=1']
 
 [host_machine]
 system = 'wasm'

@@ -6,7 +6,7 @@
 class CertificateReader
 {
 public:
-    ~CertificateReader();
+    ~CertificateReader() = default;
 
     Field get(uint16_t field_id, uint16_t index);
 
@@ -14,14 +14,14 @@ public:
 
     size_t count(uint16_t field_id);
 
-private:
-    CertificateReader() = default;
+    static void parse(const std::string &bytes, bool attest,
+                      const emscripten::val &callback);
 
-    bool context_is_valid = false;
+private:
+    CertificateReader(std::map<uint16_t,
+                      std::vector<std::vector<uint8_t>>> fields);
     std::map<uint16_t, std::vector<std::vector<uint8_t>>> fields;
 };
 
-CertificateReader::~CertificateReader()
-{
 
-}
+
